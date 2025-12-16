@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SecureVault.Api/SecureVault.Api.csproj" />
+  <Project Path="SecureVault.Core/SecureVault.Core.csproj" />
+</Solution>
