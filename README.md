@@ -1,206 +1,253 @@
-# SecureVault API - Sistema de Gestión de Secretos Seguro
+# SecureVault API
 
-Una API RESTful construida con .NET 10 que implementa cifrado AES-256 para proteger datos sensibles y autenticación JWT para garantizar acceso seguro a los recursos. Este sistema permite almacenar y recuperar secretos de forma segura mediante técnicas avanzadas de criptografía.
+Sistema de gestión de secretos empresarial con cifrado AES-256 y autenticación basada en tokens JWT. Implementado sobre .NET 10 con arquitectura RESTful para almacenamiento seguro de información sensible.
 
-## 🚀 Descripción
+## General Overview
 
-SecureVault es una aplicación de gestión de secretos que proporciona un almacenamiento seguro para información sensible. Cada secreto se cifra utilizando el algoritmo AES-256 antes de ser almacenado en la base de datos, garantizando que incluso si alguien accede a los datos en bruto, no podrá leerlos sin la clave de cifrado correspondiente.
+SecureVault proporciona un servicio de almacenamiento cifrado para datos sensibles mediante criptografía simétrica AES-256. Cada secreto se cifra antes de persistir en la base de datos, garantizando confidencialidad incluso ante acceso no autorizado a los datos almacenados.
 
-La API implementa autenticación basada en tokens JWT (JSON Web Tokens), asegurando que solo los usuarios autenticados puedan crear y acceder a los secretos almacenados.
+La autenticación se implementa mediante JSON Web Tokens (JWT), restringiendo el acceso a recursos protegidos únicamente a usuarios autenticados. El sistema valida la identidad del usuario y emite tokens con tiempo de expiración configurable.
 
-## 🛠️ Tecnologías
+## Tech Stack
 
-- **.NET 10** - Framework y runtime
-- **Entity Framework Core** - ORM para acceso a datos
-- **SQL Server** - Base de datos relacional
-- **Swagger/OpenAPI** - Documentación interactiva de la API
-- **AES-256** - Algoritmo de cifrado simétrico
-- **JWT (JSON Web Tokens)** - Sistema de autenticación y autorización
-- **ASP.NET Core** - Framework web para construir APIs REST
+| Componente | Tecnología | Versión |
+|------------|------------|---------|
+| Runtime | .NET | 10.0 |
+| Framework Web | ASP.NET Core | 10.0 |
+| ORM | Entity Framework Core | 10.0 |
+| Base de Datos | SQL Server | - |
+| Documentación API | Swagger/OpenAPI | 3.0 |
+| Cifrado | AES-256 | - |
+| Autenticación | JWT | - |
 
-## 📦 Instalación y Configuración
+## Security Specs
+
+### Cifrado de Datos
+
+- **Algoritmo**: AES-256 (Advanced Encryption Standard)
+- **Modo**: CBC (Cipher Block Chaining)
+- **Longitud de clave**: 256 bits (32 bytes)
+- **Vector de inicialización**: Generado aleatoriamente por operación
+
+Los secretos se cifran en el momento de almacenamiento y se descifran únicamente durante la recuperación autorizada. La clave de cifrado debe mantenerse fuera del control de versiones y gestionarse mediante servicios de gestión de secretos en entornos de producción.
+
+### Autenticación y Autorización
+
+- **Protocolo**: JWT (JSON Web Tokens)
+- **Algoritmo de firma**: HMAC-SHA256
+- **Validación**: Issuer, Audience y expiración temporal
+- **Transporte**: Header Authorization Bearer Token
+
+Los tokens JWT incluyen claims de identidad y expiración. La validación se realiza en cada solicitud a endpoints protegidos mediante middleware de autenticación ASP.NET Core.
+
+### Gestión de Secretos
+
+La configuración de aplicación contiene información sensible que requiere manejo estricto:
+
+- Claves de cifrado AES-256
+- Claves de firma JWT
+- Cadenas de conexión a base de datos
+- Credenciales de autenticación
+
+**Requisitos de seguridad**:
+
+- El archivo `appsettings.json` está excluido del control de versiones mediante `.gitignore`
+- En producción, utilizar servicios de gestión de secretos (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault)
+- Rotación periódica de claves de cifrado y firma JWT
+- Acceso restringido a archivos de configuración mediante permisos del sistema operativo
+
+## Local Setup
 
 ### Requisitos Previos
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [SQL Server](https://www.microsoft.com/sql-server/sql-server-downloads) o SQL Server LocalDB
-- [Visual Studio 2022](https://visualstudio.microsoft.com/) o [Visual Studio Code](https://code.visualstudio.com/)
+- .NET 10 SDK instalado y configurado
+- SQL Server o SQL Server LocalDB en ejecución
+- Editor de código o IDE compatible con .NET
 
-### Pasos de Instalación
+### Procedimiento de Instalación
 
-1. **Clonar el repositorio**
+1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/[TU-USUARIO]/SecureVault.git
+   git clone <repository-url>
    cd SecureVault
    ```
-   
-   > ⚠️ **Nota:** Reemplaza `[TU-USUARIO]` con tu nombre de usuario de GitHub.
 
-2. **Restaurar dependencias NuGet**
+2. Restaurar dependencias NuGet:
    ```bash
    dotnet restore
    ```
 
-3. **Configurar la base de datos**
-   
-   Asegúrate de tener SQL Server ejecutándose. Luego, ejecuta las migraciones:
-   
+3. Aplicar migraciones de base de datos:
    ```bash
    cd SecureVault.Api
    dotnet ef database update
    ```
-   
-   Esto creará la base de datos `SecureVaultDb` con todas las tablas necesarias.
 
-4. **Configurar appsettings.json**
-   
-   **IMPORTANTE**: El archivo `appsettings.json` no se incluye en el repositorio por razones de seguridad. Debes crearlo manualmente en la carpeta `SecureVault.Api/` con el siguiente contenido:
+4. Configurar archivo de configuración de aplicación.
 
-   ```json
-   {
-     "Logging": {
-       "LogLevel": {
-         "Default": "Information",
-         "Microsoft.AspNetCore": "Warning"
-       }
-     },
-     "AllowedHosts": "*",
-     "ConnectionStrings": {
-       "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=SecureVaultDb;Trusted_Connection=True;MultipleActiveResultSets=true"
-     },
-     "Encryption": {
-       "Key": "TuClaveDe32CaracteresParaAES256!"
-     },
-     "Jwt": {
-       "Key": "TuClaveSecretaSuperLargaParaFirmarTokensJWT_Minimo32Caracteres!",
-       "Issuer": "SecureVaultApi",
-       "Audience": "SecureVaultUsers"
-     },
-     "Auth": {
-       "DemoUsername": "admin",
-       "DemoPassword": "12345"
-     }
-   }
+### Configuración de Secretos
+
+**ADVERTENCIA**: La configuración de secretos es un procedimiento crítico de seguridad. El archivo `appsettings.json` debe crearse manualmente en el directorio `SecureVault.Api/` con la siguiente estructura:
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=SecureVaultDb;Trusted_Connection=True;MultipleActiveResultSets=true"
+  },
+  "Encryption": {
+    "Key": "BASE64_ENCODED_32_BYTE_KEY_HERE"
+  },
+  "Jwt": {
+    "Key": "EstaEsUnaClaveSuperSecretaParaFirmarTokensJWT_TieneQueSerLarga!",
+    "Issuer": "SecureVaultApi",
+    "Audience": "SecureVaultUsers",
+    "ExpirationMinutes": 60
+  },
+  "Auth": {
+    "DemoUsername": "admin",
+    "DemoPasswordHash": "BCRYPT_HASH_HERE"
+  }
+}
+```
+
+**Especificaciones de configuración**:
+
+| Parámetro | Requisito | Descripción |
+|-----------|-----------|-------------|
+| `Encryption:Key` | Cadena Base64 de exactamente 32 bytes (44 caracteres con padding) | Clave de cifrado AES-256 en formato Base64. **IMPORTANTE**: Debe ser Base64, no texto plano, para evitar problemas de encoding con caracteres especiales. |
+| `Jwt:Key` | Mínimo 32 caracteres | Clave de firma para tokens JWT. Debe ser única y de alta entropía. |
+| `Jwt:Issuer` | String no vacío | Identificador del emisor de tokens. |
+| `Jwt:Audience` | String no vacío | Identificador de la audiencia esperada. |
+| `Auth:DemoPasswordHash` | Hash BCrypt válido | Hash BCrypt de la contraseña del usuario demo. **IMPORTANTE**: Ya no se usa `DemoPassword` en texto plano por seguridad. |
+| `ConnectionStrings:DefaultConnection` | Cadena de conexión válida | Cadena de conexión a SQL Server. Ajustar según entorno. |
+
+**Procedimiento de generación de claves**:
+
+1. **Generar clave de encriptación (Base64)**:
+   ```csharp
+   // Ejecutar en C# Interactive o crear un script temporal
+   using System.Security.Cryptography;
+   var key = new byte[32];
+   RandomNumberGenerator.Fill(key);
+   Console.WriteLine(Convert.ToBase64String(key));
    ```
 
-   **Notas importantes**:
-   - `Encryption:Key`: Debe tener **exactamente 32 caracteres** para AES-256. Esta clave se usa para cifrar los secretos.
-   - `Jwt:Key`: Clave para firmar los tokens JWT. Debe ser segura y única.
-   - `Auth:DemoUsername` y `Auth:DemoPassword`: Credenciales de demostración (solo para desarrollo/demo).
-   - Ajusta la cadena de conexión según tu configuración de SQL Server.
+2. **Generar hash BCrypt de contraseña**:
+   ```csharp
+   // Ejecutar en C# Interactive (requiere BCrypt.Net-Next)
+   using BCrypt.Net;
+   var hash = BCrypt.HashPassword("tu_contraseña_aqui", workFactor: 12);
+   Console.WriteLine(hash);
+   ```
 
-5. **Ejecutar la aplicación**
+   O usar una herramienta en línea como: https://bcrypt-generator.com/
+
+3. **Seguridad**:
+   - No reutilizar claves entre entornos (desarrollo, staging, producción)
+   - Documentar el proceso de rotación de claves en procedimientos operativos
+   - Mantener las claves fuera del control de versiones
+
+5. Ejecutar la aplicación:
    ```bash
    dotnet run --project SecureVault.Api
    ```
 
-   La API estará disponible en:
-   - HTTP: `http://localhost:5000`
-   - HTTPS: `https://localhost:5001`
-   - Swagger UI: `https://localhost:5001/swagger`
+La API estará disponible en los siguientes endpoints:
 
-## 🔐 Nota de Seguridad
+- HTTP: `http://localhost:5000`
+- HTTPS: `https://localhost:5001`
+- Swagger UI: `https://localhost:5001/swagger`
 
-Por razones de seguridad, los archivos `appsettings.json` y `appsettings.Development.json` **NO** están incluidos en el repositorio, ya que contienen información sensible como:
-
-- Claves de cifrado JWT
-- Cadenas de conexión a la base de datos
-- Configuraciones específicas del entorno
-
-**Es fundamental** que crees estos archivos localmente siguiendo la estructura mostrada en la sección de instalación. En un entorno de producción, se recomienda utilizar:
-
-- Variables de entorno
-- Azure Key Vault
-- AWS Secrets Manager
-- Otros servicios de gestión de secretos
-
-## 📡 Endpoints
+## API Reference
 
 ### Autenticación
 
-#### `POST /api/auth/login`
-Autentica un usuario y devuelve un token JWT.
+#### POST /api/auth/login
 
-**Body:**
+Autentica un usuario y devuelve un token JWT válido.
+
+**Request Body**:
 ```json
 {
-  "username": "admin",
-  "password": "12345"
+  "username": "string",
+  "password": "string"
 }
 ```
 
-**Response:**
+**Response 200 OK**:
 ```json
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "string",
   "expires": "2024-12-15T12:30:00Z"
 }
 ```
 
+**Response 401 Unauthorized**: Credenciales inválidas.
+
 ### Secretos
 
-**Todos los endpoints de secretos requieren autenticación JWT.**
+Todos los endpoints de secretos requieren autenticación mediante token JWT en el header `Authorization`:
 
-Agrega el token en el header de la petición:
 ```
-Authorization: Bearer {tu_token_jwt}
+Authorization: Bearer {token}
 ```
 
-#### `POST /api/secrets`
-Crea un nuevo secreto cifrado.
+#### POST /api/secrets
 
-**Body:**
+Crea un nuevo secreto cifrado en el almacenamiento.
+
+**Request Body**:
 ```json
 {
-  "name": "API Key de GitHub",
-  "value": "ghp_xxxxxxxxxxxxxxxxxxxx"
+  "name": "string",
+  "value": "string"
 }
 ```
 
-**Response:**
+**Response 201 Created**:
 ```json
 {
-  "message": "Secreto guardado exitosamente (¡y cifrado!)",
+  "message": "Secreto guardado exitosamente",
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
 }
 ```
 
-#### `GET /api/secrets/{id}`
-Obtiene un secreto por su ID y lo devuelve descifrado.
+**Response 400 Bad Request**: Datos de entrada inválidos.
 
-**Response:**
+**Response 401 Unauthorized**: Token JWT ausente o inválido.
+
+#### GET /api/secrets/{id}
+
+Recupera un secreto por identificador y lo devuelve descifrado.
+
+**Path Parameters**:
+- `id` (UUID): Identificador único del secreto.
+
+**Response 200 OK**:
 ```json
 {
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "name": "API Key de GitHub",
-  "decryptedValue": "ghp_xxxxxxxxxxxxxxxxxxxx",
+  "name": "string",
+  "decryptedValue": "string",
   "createdAt": "2024-12-15T10:00:00Z"
 }
 ```
 
-## 📚 Documentación Adicional
+**Response 404 Not Found**: Secreto no encontrado.
 
-Puedes explorar y probar todos los endpoints utilizando la interfaz Swagger UI disponible en `/swagger` cuando la aplicación está en modo desarrollo.
+**Response 401 Unauthorized**: Token JWT ausente o inválido.
 
-## 🤝 Contribuciones
+### Documentación Interactiva
 
-Las contribuciones son bienvenidas. Por favor:
+La documentación completa de la API está disponible mediante Swagger UI en el endpoint `/swagger` cuando la aplicación se ejecuta en modo desarrollo.
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+## Licencia
 
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
-## 👤 Autor
-
-**Max Acosta** - [@MaxAcosta-30](https://github.com/MaxAcosta-30)
-
----
-
-⭐ Si este proyecto te resultó útil, ¡dale una estrella!
-
+Este proyecto está disponible bajo la licencia MIT.

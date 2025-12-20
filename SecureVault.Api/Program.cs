@@ -15,13 +15,24 @@ builder.Services.AddDbContext<VaultDbContext>(options =>
         b.MigrationsAssembly(typeof(Program).Assembly.GetName().Name))
 );
 
-var encryptionKeyString = builder.Configuration["Encryption:Key"]
-    ?? throw new InvalidOperationException("La clave de cifrado 'Encryption:Key' no está configurada. Debe configurarse en appsettings.json con una clave de 32 caracteres.");
+// La clave de cifrado debe estar en Base64 para evitar problemas de encoding
+// Base64 de 32 bytes = 44 caracteres (con padding)
+var encryptionKeyBase64 = builder.Configuration["Encryption:Key"]
+    ?? throw new InvalidOperationException("La clave de cifrado 'Encryption:Key' no está configurada. Debe configurarse en appsettings.json como una cadena Base64 de 32 bytes (44 caracteres con padding).");
 
-if (encryptionKeyString.Length != 32)
-    throw new InvalidOperationException($"La clave de cifrado debe tener exactamente 32 caracteres. Longitud actual: {encryptionKeyString.Length}");
+byte[] encryptionKeyBytes;
+try
+{
+    encryptionKeyBytes = Convert.FromBase64String(encryptionKeyBase64);
+}
+catch (FormatException)
+{
+    throw new InvalidOperationException("La clave de cifrado 'Encryption:Key' no es una cadena Base64 válida. Debe ser una cadena Base64 que represente exactamente 32 bytes.");
+}
 
-var encryptionKeyBytes = Encoding.UTF8.GetBytes(encryptionKeyString);
+if (encryptionKeyBytes.Length != 32)
+    throw new InvalidOperationException($"La clave de cifrado debe tener exactamente 32 bytes después de decodificar desde Base64. Longitud actual: {encryptionKeyBytes.Length} bytes.");
+
 builder.Services.AddScoped<IEncryptionService>(_ => new AesEncryptionService(encryptionKeyBytes));
 
 builder.Services.AddControllers();
@@ -68,7 +79,9 @@ builder.Services.AddAuthentication(config => {
     config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(config => {
-    config.RequireHttpsMetadata = false; 
+    // Solo deshabilitar HTTPS en desarrollo para evitar problemas de certificados locales
+    // En producción, RequireHttpsMetadata debe ser true para seguridad
+    config.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     config.SaveToken = true;
     config.TokenValidationParameters = new TokenValidationParameters {
         ValidateIssuerSigningKey = true,
