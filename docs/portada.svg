@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-label="SecureVault: Gestión de secretos cifrados">
+  <rect width="1280" height="400" fill="#0E1014"/>
+  <text x="72" y="92" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="18" fill="#F0B67F" letter-spacing="2">.NET 10  ·  AES-256  ·  JWT</text>
+  <text x="72" y="190" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="84" font-weight="700" fill="#EEF0F3" letter-spacing="-3">SecureVault</text>
+  <text x="74" y="246" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="26" fill="#9AA1AD">Gestión de secretos cifrados</text>
+  <text x="74" y="340" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="16" fill="#9AA1AD">Serie backend · Max Acosta</text>
+  <g transform="translate(860 60)"><circle cx="180" cy="140" r="118" fill="none" stroke="#2A2F38" stroke-width="2"/>
+  <circle cx="180" cy="140" r="88" fill="none" stroke="#9AA1AD" stroke-width="2" stroke-dasharray="4 10"/>
+  <circle cx="180" cy="140" r="52" fill="none" stroke="#F0B67F" stroke-width="4"/>
+  <rect x="172" y="112" width="16" height="40" rx="3" fill="#F0B67F"/>
+  <text x="98" y="296" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="16" fill="#9AA1AD">IV único por secreto</text></g>
+</svg>
