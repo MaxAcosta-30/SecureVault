@@ -1,14 +1,16 @@
 # SecureVault API
 
+<p align="center"><img src="docs/portada.svg" alt="SecureVault: gestión de secretos cifrados con AES-256 y JWT sobre .NET 10" width="100%"></p>
+
 Sistema de gestión de secretos empresarial con cifrado AES-256 y autenticación basada en tokens JWT. Implementado sobre .NET 10 con arquitectura RESTful para almacenamiento seguro de información sensible.
 
-## General Overview
+## Visión general
 
 SecureVault proporciona un servicio de almacenamiento cifrado para datos sensibles mediante criptografía simétrica AES-256. Cada secreto se cifra antes de persistir en la base de datos, garantizando confidencialidad incluso ante acceso no autorizado a los datos almacenados.
 
 La autenticación se implementa mediante JSON Web Tokens (JWT), restringiendo el acceso a recursos protegidos únicamente a usuarios autenticados. El sistema valida la identidad del usuario y emite tokens con tiempo de expiración configurable.
 
-## Tech Stack
+## Stack
 
 | Componente | Tecnología | Versión |
 |------------|------------|---------|
@@ -20,7 +22,7 @@ La autenticación se implementa mediante JSON Web Tokens (JWT), restringiendo el
 | Cifrado | AES-256 | - |
 | Autenticación | JWT | - |
 
-## Security Specs
+## Seguridad
 
 ### Cifrado de Datos
 
@@ -56,7 +58,7 @@ La configuración de aplicación contiene información sensible que requiere man
 - Rotación periódica de claves de cifrado y firma JWT
 - Acceso restringido a archivos de configuración mediante permisos del sistema operativo
 
-## Local Setup
+## Cómo correrlo en local
 
 ### Requisitos Previos
 
@@ -165,7 +167,7 @@ La API estará disponible en los siguientes endpoints:
 - HTTPS: `https://localhost:5001`
 - Swagger UI: `https://localhost:5001/swagger`
 
-## API Reference
+## Referencia de la API
 
 ### Autenticación
 
